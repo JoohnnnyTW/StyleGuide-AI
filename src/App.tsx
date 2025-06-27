@@ -1354,64 +1354,53 @@ Respond ONLY with the JSON array of the new tags.`;
     };
 
     if (selectedEngine === 'flux') {
-        console.log("Using Flux API (via proxy) for image generation with tolerance:", fluxSafetyTolerance);
-        try {
-            const fluxProxyUrl = '/api/flux-proxy';
-            const fluxPayload: any = {
-                prompt: finalPromptForImageModel,
-                output_format: fluxOutputFormat,
-                prompt_upsampling: fluxPromptUpsampling,
-                safety_tolerance: fluxSafetyTolerance,
-            };
-            if (promptSpecificImageFile && currentPromptImageAspectRatio) {
-                fluxPayload.aspect_ratio = currentPromptImageAspectRatio;
-            }
+      console.log("Using Flux API (via proxy) for image generation with tolerance:", fluxSafetyTolerance);
+      try {
+          const fluxProxyUrl = '/api/flux-proxy';
+          const fluxPayload: any = {
+              prompt: finalPromptForImageModel,
+              output_format: fluxOutputFormat,
+              prompt_upsampling: fluxPromptUpsampling,
+              safety_tolerance: fluxSafetyTolerance,
+          };
+          if (promptSpecificImageFile && currentPromptImageAspectRatio) {
+              fluxPayload.aspect_ratio = currentPromptImageAspectRatio;
+          }
 
-            const apiResponse = await fetch(fluxProxyUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(fluxPayload),
-            });
+          const apiResponse = await fetch(fluxProxyUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(fluxPayload),
+          });
 
-            // Read the body text first to handle non-JSON responses gracefully
-            const responseBodyText = await apiResponse.text();
-            let fluxResult;
+          const responseBodyText = await apiResponse.text();
+          let fluxResult;
+          try {
+              fluxResult = JSON.parse(responseBodyText);
+          } catch (e) {
+              const errorMessage = `Flux API 返回了無效的回應 (狀態碼 ${apiResponse.status})。內容: ${responseBodyText.substring(0, 300)}`;
+              throw new Error(errorMessage);
+          }
+          
+          if (!apiResponse.ok) {
+              const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || JSON.stringify(fluxResult);
+              throw new Error(`Flux API 錯誤 (${apiResponse.status}): ${errorMessage}`);
+          }
 
-            try {
-                fluxResult = JSON.parse(responseBodyText);
-            } catch (e) {
-                // The response from the API was not valid JSON (e.g., an HTML error page)
-                const errorMessage = `Flux API 返回了無效的回應 (狀態碼 ${apiResponse.status})。內容: ${responseBodyText.substring(0, 300)}`;
-                throw new Error(errorMessage);
-            }
-            
-            if (!apiResponse.ok) {
-                // The API returned an error status code (4xx, 5xx), but the body was valid JSON.
-                const errorMessage = fluxResult.message || fluxResult.error || JSON.stringify(fluxResult);
-                throw new Error(`Flux API 錯誤 (代理): ${apiResponse.status} - ${errorMessage}`);
-            }
+          const base64ImageBytes = fluxResult.image_bytes || (fluxResult.images && fluxResult.images[0]?.image_bytes) || fluxResult.base64_image || fluxResult.generated_image_base64;
 
-            // At this point, the response is OK (2xx) and we have parsed JSON.
-            // Now, we must check if it contains the image or an error message within the success payload.
-            const base64ImageBytes = fluxResult.image_bytes || (fluxResult.images && fluxResult.images[0]?.image_bytes) || fluxResult.base64_image || fluxResult.generated_image_base64;
-
-            if (base64ImageBytes) {
-                // SUCCESS: We have the image data.
-                updateStateWithNewImage(`data:${fluxOutputFormat === 'png' ? 'image/png' : 'image/jpeg'};base64,${base64ImageBytes}`, targetProjectId, finalPromptForImageModel);
-            } else {
-                // FAILURE: The response was successful (200 OK) but contained an error message instead of an image.
-                const errorMessage = fluxResult.message || fluxResult.error || JSON.stringify(fluxResult);
-                const fullError = `Flux API 圖片生成失敗： ${errorMessage}`;
-                console.error(fullError, "Response payload:", fluxResult);
-                setGenerationError(fullError); // Display the specific error from the API to the user.
-            }
-        } catch (fluxError: any) {
-            // This catch block handles network errors from fetch() or errors thrown above.
-            console.error("Error generating image with Flux API (via proxy):", fluxError);
-            setGenerationError(fluxError.message || '處理 Flux API 請求時發生未知錯誤。');
-        } finally {
-            setIsGeneratingImage(false);
-        }
+          if (base64ImageBytes) {
+              updateStateWithNewImage(`data:${fluxOutputFormat === 'png' ? 'image/png' : 'image/jpeg'};base64,${base64ImageBytes}`, targetProjectId, finalPromptForImageModel);
+          } else {
+              const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || "回應中未找到圖片資料。";
+              throw new Error(`圖片生成失敗： ${errorMessage}`);
+          }
+      } catch (fluxError: any) {
+          console.error("Error generating image with Flux API (via proxy):", fluxError);
+          setGenerationError(fluxError.message || '處理 Flux API 請求時發生未知錯誤。');
+      } finally {
+          setIsGeneratingImage(false);
+      }
     } else if (selectedEngine === 'imagen') {
         if (!ai) {
              setGenerationError("Imagen 3 無法使用：Gemini API 金鑰未設定。請在伺服器環境中設定 API_KEY。");
