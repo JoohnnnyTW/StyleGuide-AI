@@ -1382,7 +1382,8 @@ Respond ONLY with the JSON array of the new tags.`;
             if (base64ImageBytes) {
                 updateStateWithNewImage(`data:${fluxOutputFormat === 'png' ? 'image/png' : 'image/jpeg'};base64,${base64ImageBytes}`, targetProjectId, finalPromptForImageModel);
             } else {
-                throw new Error("Flux API 回應中未找到圖片資料。");
+                const errorMessage = fluxResult.message || fluxResult.error || JSON.stringify(fluxResult);
+                throw new Error(`回應中未找到圖片資料。 API 回應: ${errorMessage}`);
             }
         } catch (fluxError: any) {
             console.error("Error generating image with Flux API (via proxy):", fluxError);
