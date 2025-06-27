@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StyleGuide AI</title>
+
+  <script>
+    // Theme management script (handles localStorage and prefers-color-scheme)
+    ((e,i,s,u,m,a,l,h)=>{let d=document.documentElement,w=["light","dark"];function p(n){(Array.isArray(e)?e:[e]).forEach(y=>{let k=y==="class",S=k&&a?m.map(f=>a[f]||f):m;k?(d.classList.remove(...S),d.classList.add(a&&a[n]?a[n]:n)):d.setAttribute(y,n)}),R(n)}function R(n){h&&w.includes(n)&&(d.style.colorScheme=n)}function c(){return window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}if(u)p(u);else try{let n=localStorage.getItem(i)||s,y=l&&n==="system"?c():n;p(y)}catch(n){console.error("Theme script error:",n)}})("class","isDarkMode","system",null,["dark","light","true","false","system"],{"true":"dark","false":"light","dark":"dark","light":"light"},true,true);
+  </script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css" integrity="sha384-Xi8rHCmBmhbuyyhbI88391ZKP2dmfnOl4rT9ZfRI7mLTdk1wblIUnrIq35nqwEvC" crossorigin="anonymous"/>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <style>
+    /* For a slightly smoother font */
+    body {
+      font-family: 'Inter', sans-serif;
+      /* Basic background for light/dark mode - Tailwind will override with more specific classes */
+      background-color: white;
+      color: black;
+    }
+    html.dark body {
+        background-color: #0F1117; /* Corresponds to --background-dark from provided CSS variables */
+        color: white;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    /* Combined CSS Custom Properties */
+    :root {
+        --font-inter:'Inter', 'Inter Fallback';
+        --font-jetbrains-mono:'JetBrains Mono', 'JetBrains Mono Fallback';
+
+        /* From second block in user example, potentially overriding */
+        --primary: 17 120 102;
+        --primary-light: 74 222 128;
+        --primary-dark: 22 101 52;
+        --background-light: 255 255 255;
+        --background-dark: 15 17 23; /* Used for html.dark body background */
+
+        /* Grays from first block in user example */
+        --gray-50: 243 247 245;
+        --gray-100: 238 242 240;
+        --gray-200: 223 227 224;
+        --gray-300: 206 211 208;
+        --gray-400: 159 163 160;
+        --gray-500: 112 116 114;
+        --gray-600: 80 84 82;
+        --gray-700: 63 67 64;
+        --gray-800: 38 42 39;
+        --gray-900: 23 27 25;
+        --gray-950: 10 15 12; 
+    }
+
+    /* Scrollbar styles for components like AnimatedTabs and Modal galleries */
+    .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: var(--scrollbar-thumb-color, #a0aec0) var(--scrollbar-track-color, #edf2f7); /* Default to Tailwind gray-400/gray-200 */
+    }
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: var(--scrollbar-track-color, #edf2f7);
+        border-radius: 3px;
+    }
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: var(--scrollbar-thumb-color, #a0aec0);
+        border-radius: 3px;
+        border: 1px solid var(--scrollbar-track-color, #edf2f7);
+    }
+    html.dark .scrollbar-thin {
+      scrollbar-color: var(--scrollbar-thumb-color, #4b5563) var(--scrollbar-track-color, #1f2937); /* Dark: Tailwind gray-600/gray-800 */
+    }
+    html.dark .scrollbar-thin::-webkit-scrollbar-track {
+        background: var(--scrollbar-track-color, #1f2937);
+    }
+    html.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: var(--scrollbar-thumb-color, #4b5563);
+        border: 1px solid var(--scrollbar-track-color, #1f2937);
+    }
+
+    .dark .scrollbar-thumb-neutral-600 { --scrollbar-thumb-color: #4b5563; } 
+    .dark .scrollbar-track-transparent { --scrollbar-track-color: transparent; }
+    .scrollbar-thumb-neutral-300 { --scrollbar-thumb-color: #d1d5db; } 
+    .scrollbar-track-transparent { --scrollbar-track-color: transparent; }
+
+    .scrollbar-thumb-gray-300 { --scrollbar-thumb-color: #d1d5db; }
+    .scrollbar-track-gray-100 { --scrollbar-track-color: #f3f4f6; }
+
+    .scrollbar-thumb-gray-400 { --scrollbar-thumb-color: #9ca3af; }
+    .scrollbar-track-gray-200 { --scrollbar-track-color: #e5e7eb; }
+    .scrollbar-thumb-gray-400\/60 { --scrollbar-thumb-color: rgba(156, 163, 175, 0.6); }
+
+    /* Blink animation for TypingAnimation cursor */
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .animate-blink {
+      animation: blink 1s step-end infinite;
+    }
+
+    /* Keyframes for SplashScreen tagline */
+    @keyframes fadeInDelay { 
+        0% { opacity: 0; } 
+        60% { opacity: 0; } /* Delay start of fade-in */
+        100% { opacity: 1; } 
+    }
+    .animate-fadeInDelay { 
+        animation: fadeInDelay 2s ease-out forwards; 
+    }
+
+
+    #root {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+  </style>
+  
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.7.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.523.0",
+    "clsx": "https://esm.sh/clsx@^2.1.1",
+    "tailwind-merge": "https://esm.sh/tailwind-merge@^3.3.1",
+    "@radix-ui/react-slot": "https://esm.sh/@radix-ui/react-slot@^1.2.3",
+    "class-variance-authority": "https://esm.sh/class-variance-authority@^0.7.1",
+    "@radix-ui/react-separator": "https://esm.sh/@radix-ui/react-separator@^1.1.7",
+    "vite": "https://esm.sh/vite@^7.0.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^4.6.0",
+    "@netlify/functions": "https://esm.sh/@netlify/functions@^4.1.7"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+  <noscript>您需要啟用 JavaScript 來運行此應用程式。</noscript>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
