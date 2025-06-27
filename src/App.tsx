@@ -1435,7 +1435,7 @@ Respond ONLY with the JSON array of the new tags.`;
                     imageFileForMasterEngineer = promptSpecificImageFile;
                 } else {
                     initialPrompt = fullPromptForGeneration;
-                    imageFileForMasterEngineer = promptSpecificImageFile;
+                    imageFileForMasterEngineer = promptSpecificImageFile || currentTabImages[0]?.file;
                 }
             } else if (activeAnimatedTab === TAB_NAME_REFERENCE_INSPIRATION && promptSpecificImageFile) {
                 initialPrompt = fullPromptForGeneration;
@@ -1443,12 +1443,14 @@ Respond ONLY with the JSON array of the new tags.`;
             } else if (activeAnimatedTab === TAB_NAME_ADD_ELEMENT && promptSpecificImageFile && currentTabImages.length > 0) {
                  initialPrompt = await getEngineeredImageModificationPrompt(promptSpecificImageFile, fullPromptForGeneration, currentTabImages, ai);
                  imageFileForMasterEngineer = promptSpecificImageFile;
-            } else if (activeAnimatedTab === TAB_NAME_EDIT && promptSpecificImageFile) {
-                initialPrompt = await getEngineeredPromptForStructuralFidelity(promptSpecificImageFile, fullPromptForGeneration, ai);
-                imageFileForMasterEngineer = promptSpecificImageFile;
+            } else if (activeAnimatedTab === TAB_NAME_EDIT && (promptSpecificImageFile || currentTabImages.length > 0)) {
+                const sourceImage = promptSpecificImageFile || currentTabImages[0].file;
+                initialPrompt = await getEngineeredPromptForStructuralFidelity(sourceImage, fullPromptForGeneration, ai);
+                imageFileForMasterEngineer = sourceImage;
             } else {
                 initialPrompt = fullPromptForGeneration;
                 if (promptSpecificImageFile) imageFileForMasterEngineer = promptSpecificImageFile;
+                else if (currentTabImages.length > 0) imageFileForMasterEngineer = currentTabImages[0].file;
             }
         } catch (e: any) {
             setGenerationError(`初步提示詞工程失敗: ${e.message}.`);
