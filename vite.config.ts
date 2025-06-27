@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    base: '/styleguide-ai-app/', 
+    base: '/StyleGuide-AI/', 
     build: {
       outDir: 'dist',
       assetsDir: '', // Place assets directly in outDir (dist)

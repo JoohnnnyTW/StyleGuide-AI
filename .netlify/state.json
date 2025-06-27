@@ -1,0 +1,19 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Taichung",
+			"country": {
+				"code": "TW",
+				"name": "Taiwan"
+			},
+			"subdivision": {
+				"code": "TXG",
+				"name": "Taichung City"
+			},
+			"timezone": "Asia/Taipei",
+			"latitude": 24.144,
+			"longitude": 120.6844
+		},
+		"timestamp": 1750986873273
+	}
+}
