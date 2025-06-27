@@ -262,7 +262,7 @@ export const AppSettingsModal: React.FC<AppSettingsModalProps> = ({
                         </div>
                         <div className="p-2 rounded-md bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
                             <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-300">
-                                Imagen 3 使用應用程式預設的 Gemini API 金鑰。請確保已在伺服器端環境變數中設定 `API_KEY`。
+                                Imagen 3 使用應用程式預設的 Gemini API 金鑰。請確保已在 Netlify 環境變數中設定 `VITE_GEMINI_API_KEY` 並重新部署。
                             </p>
                             {!isGeminiApiAvailable && (
                                 <p className="text-xs text-red-500 dark:text-red-400 mt-1">
@@ -275,6 +275,11 @@ export const AppSettingsModal: React.FC<AppSettingsModalProps> = ({
 
                 {selectedEngine === 'flux' && (
                     <>
+                       <div className="mb-3 sm:mb-4 p-2 rounded-md bg-neutral-50 dark:bg-neutral-700/50 border border-neutral-200 dark:border-neutral-600">
+                            <p className="text-xs sm:text-sm text-neutral-600 dark:text-neutral-300">
+                                Flux API 金鑰 (`FLUX_API_KEY`) 由管理員在伺服器端 (Netlify Functions 環境變數) 設定。客戶端無需輸入。
+                            </p>
+                        </div>
                         <div className="mb-3 sm:mb-4">
                             <label htmlFor="flux-output-format" className="block text-xs sm:text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
                                 輸出格式 (Flux)：

@@ -63,6 +63,38 @@ StyleGuide AI is a React-based web application designed for interior design idea
 └── vite.config.ts                # Vite build tool configuration
 ```
 
+## Netlify Configuration (`netlify.toml`)
+
+This project includes a `netlify.toml` file to ensure correct deployment and behavior on Netlify. It handles three critical tasks:
+
+1.  **Build Configuration:** It tells Netlify how to build the site (`npm run build`) and which folder to deploy (`dist`).
+2.  **Function Directory:** It specifies where the serverless functions are located (`netlify/functions`).
+3.  **Redirects & Rewrites:**
+    -   **API Proxy:** It creates a server-side proxy that rewrites requests from `/api/*` to the corresponding Netlify Function in `/.netlify/functions/*`. This allows the frontend to call the Flux API without exposing secret keys, as the `flux-proxy.ts` function adds the key on the server.
+    -   **SPA Fallback:** It ensures that any direct navigation to a non-root URL (e.g., `yourapp.com/some-page`) correctly serves the `index.html` file, allowing the React application to handle its own routing. This is the standard fix for the "white screen" issue on subpages of SPAs.
+
+Here is the content of `netlify.toml`:
+```toml
+# Netlify Build & Redirect Configuration
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# Proxy rule to route API requests to the Netlify Function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200 
+
+# SPA fallback rule (must be last)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+```
+
+
 ## Setup and Development
 
 ### Prerequisites
@@ -94,14 +126,14 @@ For **local development**, create a `.env` file in the root of your project:
 
 # For Gemini API (Imagen 3, text generation, suggestions)
 # This is loaded by vite.config.ts and exposed to client-side code as process.env.API_KEY.
-API_KEY="your_actual_gemini_api_key"
+VITE_GEMINI_API_KEY="your_actual_gemini_api_key"
 
 # For Flux API (used by the local Netlify Dev proxy for the flux-proxy function)
 # This is a runtime variable for the local serverless function emulator (netlify dev)
 FLUX_API_KEY="your_actual_flux_api_key"
 ```
 
--   `API_KEY`: Your API key for Google Gemini. `vite.config.ts` is configured to load this variable and make it available as `process.env.API_KEY` throughout the app.
+-   `VITE_GEMINI_API_KEY`: Your API key for Google Gemini. `vite.config.ts` is configured to load this variable and make it available as `process.env.API_KEY` throughout the app.
 -   `FLUX_API_KEY`: Your API key for Flux Kontext Max. This is used by the `netlify dev` environment to simulate the Netlify function proxy.
 
 **Important:** Never commit your `.env` file to Git. Ensure `.env` is listed in your `.gitignore` file.
@@ -119,11 +151,11 @@ To run the application locally with Vite's development server and Netlify's loca
     netlify login
     ```
 3.  **Run Netlify Dev:**
-    This command starts the Vite dev server (as specified in `netlify.toml` `[dev]`) and the Netlify functions emulator.
+    This command starts the Vite dev server and the Netlify functions emulator, using your `netlify.toml` for configuration.
     ```bash
     npm run dev
     ```
-    The application should be accessible at `http://localhost:8888` (or another port if 8888 is busy, as configured in `netlify.toml`). Requests from the client to `/api/flux-proxy` will be routed by Netlify Dev to your local `flux-proxy.ts` function, which will use the `FLUX_API_KEY` from your `.env` file.
+    The application should be accessible at `http://localhost:8888` (or another port if 8888 is busy). Requests from the client to `/api/flux-proxy` will be routed by Netlify Dev to your local `flux-proxy.ts` function, which will use the `FLUX_API_KEY` from your `.env` file.
 
 ## Building for Production
 
@@ -132,19 +164,16 @@ To build the application for production:
 ```bash
 npm run build
 ```
-This command will:
-1.  Build the React application using Vite, bundling assets into the `dist/` directory.
+This command will build the React application using Vite, bundling assets into the `dist/` directory.
 
-## Deployment
-
-### Netlify (Recommended)
+## Deployment to Netlify
 
 This project is configured for streamlined deployment to Netlify.
 
 #### 1. Push to GitHub (or your preferred Git provider)
 
 -   Ensure your project is a Git repository.
--   Commit all your code, including `netlify.toml` and the `netlify/functions` directory.
+-   Commit all your code, including the `netlify.toml` and the `netlify/functions` directory.
 -   Push it to your Git provider.
 
 #### 2. Connect to Netlify
@@ -155,14 +184,14 @@ This project is configured for streamlined deployment to Netlify.
 
 #### 3. Configure Build Settings
 
-Netlify should automatically detect the settings from your `netlify.toml` file.
+Netlify will automatically detect the settings from your `netlify.toml` file (`build` command, `publish` directory, and `functions` directory). You should not need to configure this manually in the UI.
 
 #### 4. Configure Environment Variables in Netlify UI (Crucial)
 
 In your Netlify site dashboard, go to "Site configuration" -> "Build & deploy" -> "Environment" -> "Environment variables". Click "Add a variable" or "Edit variables" and add:
 
 -   **For Gemini API (Client-side build variable):**
-    -   **Key:** `API_KEY`
+    -   **Key:** `VITE_GEMINI_API_KEY`
     -   **Value:** Your_Actual_Google_Gemini_API_Key
     -   **Scope:** Set this to be available to "Builds". This key is embedded during the build process.
 
@@ -175,13 +204,6 @@ In your Netlify site dashboard, go to "Site configuration" -> "Build & deploy" -
 
 -   Deployments are usually triggered automatically when you push to your connected Git branch (e.g., `main`).
 -   After setting or changing environment variables, a **new deploy is required** for them to take effect.
-
-### GitHub Pages
-
-To deploy to GitHub Pages, you need to ensure the `base` path in `vite.config.ts` is correctly set to your repository name (e.g., `/your-repo-name/`). The configuration has been updated to `/styleguide-ai-app/`. If your repository name is different, you must change this value.
-
-After building the project with `npm run build`, deploy the `dist` folder to your `gh-pages` branch. Note that the Flux proxy function will not work on GitHub Pages, as it is a static hosting provider; only features using the Gemini API will be available.
-
 
 ## Linting
 

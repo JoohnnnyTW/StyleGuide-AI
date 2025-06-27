@@ -1,9 +1,16 @@
-# netlify.toml
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
 
-[functions]
-  directory = "netlify/functions"
-
+# Proxy rule to route API requests to the Netlify Function
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
+  status = 200 
+
+# SPA fallback rule (must be last)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
   status = 200

@@ -4,11 +4,11 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '');
+  const env = loadEnv(mode, '', '');
 
   return {
     plugins: [react()],
-    base: '/StyleGuide-AI/', 
+    base: '/', // Changed for root deployment on Netlify
     build: {
       outDir: 'dist',
       assetsDir: '', // Place assets directly in outDir (dist)
@@ -25,7 +25,8 @@ export default defineConfig(({ mode }) => {
     define: {
       // Per strict instructions, `process.env.API_KEY` is used for the Gemini API key.
       // Vite's `define` performs a direct text replacement, making the env var available in client-side code.
-      'process.env.API_KEY': JSON.stringify(env.API_KEY),
+      // Using VITE_GEMINI_API_KEY aligns with Vite's standards for environment variables.
+      'process.env.API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY),
     },
     // Proxy for local development with Netlify Functions
     server: {
