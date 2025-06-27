@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { GeneratedImageHistoryEntry, Project } from '../../App'; 
 import { GeneratedImageGallery } from './GeneratedImageCarousel'; 

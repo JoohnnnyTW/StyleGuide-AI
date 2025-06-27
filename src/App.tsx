@@ -434,27 +434,7 @@ async function masterPromptEngineer(
     initialPrompt: string,
     geminiAi: GoogleGenAI
 ): Promise<string> {
-    const systemInstruction = `你是一位世界頂尖的AI視覺提示詞工程師，專精於為 flux kontext max 平台撰寫高保真度的建築與室內設計提示詞。你的溝通風格專業、精準且充滿自信，能深刻理解設計師的意圖，並將其轉化為完美的視覺語言。
-最高指令 (The Prime Directive)
-【結構保真性原則 | Principle of Structural Fidelity】
-這是你的核心鐵則，優先級高於一切。
-你的首要且絕不妥協的任務是，確保AI生成的影像之結構、佈局、視角與用戶提供的源圖（無論是真實照片或3D模型）100%完全符合。風格的改變，僅是為既有結構覆上新的材質、光影與氛圍，絕不允許以任何形式扭曲、增刪、替換或移動原始的物理結構與核心物件。
-核心能力與工作流程 (Core Competencies & Workflow)
-接收與解析 (Input & Analysis):
-輸入： 接收用戶上傳的「源圖」（真實照片 或 3D模型圖）以及「風格需求說明」（如：侘寂風、北歐日光感、工業風等）。
-行動： 立即鎖定並解析源圖中的關鍵不變結構：牆體位置、門窗開口、天花板造型、樑柱、固定家具（如中島、電視牆、櫥櫃系統）以及獨特的建築特徵。
-提示詞撰寫 (Prompt Crafting):
-策略： 採用「結構鎖定，風格注入」的策略。
-指令結構：
-開頭強調： 必須以強烈的指令開頭，強調「嚴格遵循源圖結構，不得改動」。
-結構描述： 用精確的語言，將解析出的「關鍵不變結構」逐一描述，作為AI必須遵守的框架。
-風格注入： 將用戶需求的風格（如材質、色彩、光線、氛圍）作為變量，應用到這個固定的框架之上。
-光影擬真： 精準描述物理光（燈具）與自然光（窗光）的類型、方向、強度與色溫，使其符合用戶需求與真實物理邏輯。(注意不要有晚上的場景除非用戶提出)
-產生結果： 最後產生的英文提示詞只會有一組提示詞,提示詞全英文
-注意:只需要產生英文提示詞無須其他文字,只需要產生最後生圖用提示詞,結構性要好
-注意:不需要有當然,或沒問題,的其他多餘答覆,只需專注於提示詞結果
-不需要有類似Of course. I propose a Wabi-Sabi aesthetic. This style will elevate the inherent tranquility of the space by emphasizing natural imperfection, organic textures, and a philosophy of quiet contemplation. It represents a sophisticated evolution from the clean lines of the original into a more soulful and tactile experience.
-Here is the master prompt to realize this vision:這句話`;
+    const systemInstruction = `你是一位世界頂尖的AI視覺提示詞工程師，專精於為 flux kontext max 平台撰寫高保真度的建築與室內設計提示詞。你的溝通風格專業、精準且充滿自信，能深刻理解設計師的意圖，並將其轉化為完美的視覺語言。\n最高指令 (The Prime Directive)\n【結構保真性原則 | Principle of Structural Fidelity】\n這是你的核心鐵則，優先級高於一切。\n你的首要且絕不妥協的任務是，確保AI生成的影像之結構、佈局、視角與用戶提供的源圖（無論是真實照片或3D模型）100%完全符合。風格的改變，僅是為既有結構覆上新的材質、光影與氛圍，絕不允許以任何形式扭曲、增刪、替換或移動原始的物理結構與核心物件。\n核心能力與工作流程 (Core Competencies & Workflow)\n接收與解析 (Input & Analysis):\n輸入： 接收用戶上傳的「源圖」（真實照片 或 3D模型圖）以及「風格需求說明」（如：侘寂風、北歐日光感、工業風等）。\n行動： 立即鎖定並解析源圖中的關鍵不變結構：牆體位置、門窗開口、天花板造型、樑柱、固定家具（如中島、電視牆、櫥櫃系統）以及獨特的建築特徵。\n提示詞撰寫 (Prompt Crafting):\n策略： 採用「結構鎖定，風格注入」的策略。\n指令結構：\n開頭強調： 必須以強烈的指令開頭，強調「嚴格遵循源圖結構，不得改動」。\n結構描述： 用精確的語言，將解析出的「關鍵不變結構」逐一描述，作為AI必須遵守的框架。\n風格注入： 將用戶需求的風格（如材質、色彩、光線、氛圍）作為變量，應用到這個固定的框架之上。\n光影擬真： 精準描述物理光（燈具）與自然光（窗光）的類型、方向、強度與色溫，使其符合用戶需求與真實物理邏輯。(注意不要有晚上的場景除非用戶提出)\n產生結果： 最後產生的英文提示詞只會有一組提示詞,提示詞全英文\n注意:只需要產生英文提示詞無須其他文字,只需要產生最後生圖用提示詞,結構性要好\n注意:不需要有當然,或沒問題,的其他多餘答覆,只需專注於提示詞結果\n不需要有類似Of course. I propose a Wabi-Sabi aesthetic. This style will elevate the inherent tranquility of the space by emphasizing natural imperfection, organic textures, and a philosophy of quiet contemplation. It represents a sophisticated evolution from the clean lines of the original into a more soulful and tactile experience.\nHere is the master prompt to realize this vision:這句話`;
 
     const base64Image = await fileToBase64(sourceImageFile);
     const imagePart = {
@@ -490,6 +470,9 @@ const App: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const [isProcessingPrompt, setIsProcessingPrompt] = useState<boolean>(false);
+  const [finalPromptForConfirmation, setFinalPromptForConfirmation] = useState<string | null>(null);
+  const [isConfirmationBubbleVisible, setIsConfirmationBubbleVisible] = useState<boolean>(false);
 
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState<boolean>(false); 
@@ -1241,6 +1224,157 @@ Respond ONLY with the JSON array of the new tags.`;
     setIsCorrectingAllTagsGlobal(false);
   };
 
+  const executeConfirmedGeneration = async (confirmedPrompt: string) => {
+    
+    setIsConfirmationBubbleVisible(false);
+    setIsGeneratingImage(true);
+    setGeneratedImageUrl(null);
+    setGenerationError(null);
+    setLastPromptForGeneratedImage(confirmedPrompt);
+
+    let targetProjectId = currentProjectId;
+    if (!targetProjectId) {
+      const defaultProjectName = "預設專案";
+      const defaultProject: Project = {
+          id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+          name: defaultProjectName,
+          images: [],
+          createdAt: Date.now(),
+      };
+      setProjects(prev => [defaultProject, ...prev]);
+      targetProjectId = defaultProject.id;
+      setCurrentProjectId(targetProjectId);
+      setActiveModalProjectId(targetProjectId);
+    }
+     if (!targetProjectId) { // Should not happen now
+        setGenerationError("無法確定專案。請選擇或建立一個專案。");
+        setIsGeneratingImage(false);
+        return;
+    }
+
+    const updateStateWithNewImage = (imageUrl: string, projId: string, usedPrompt: string) => {
+      setGeneratedImageUrl(imageUrl);
+      const newHistoryEntry: GeneratedImageHistoryEntry = {
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+        imageUrl: imageUrl,
+        prompt: usedPrompt, 
+        projectId: projId,
+      };
+      
+      setProjects(prevProjects =>
+        prevProjects.map(p =>
+          p.id === projId
+          ? { ...p, images: [newHistoryEntry, ...p.images] }
+          : p
+        ).sort((a,b) => b.createdAt - a.createdAt) 
+      );
+      setUserBasePrompt(""); 
+      setSelectedAiSuggestionValues([]);
+      if (activeAnimatedTab === TAB_NAME_GENERATE_IMAGE) setGenModeSelectedTagsForPrompt([]);
+      
+      if (promptSpecificImagePreviewUrl) { 
+          setBeforeImageUrlForCompare(promptSpecificImagePreviewUrl);
+          setShowImageCompare(true);
+      }
+    };
+
+    if (selectedEngine === 'flux') {
+        console.log("Using Flux API (via proxy) for image generation with tolerance:", fluxSafetyTolerance);
+        try {
+            const fluxProxyUrl = '/api/flux-proxy';
+            const fluxPayload: any = {
+                prompt: confirmedPrompt,
+                output_format: fluxOutputFormat,
+                prompt_upsampling: fluxPromptUpsampling,
+                safety_tolerance: fluxSafetyTolerance,
+            };
+            if (promptSpecificImageFile) {
+                const base64Image = await fileToBase64(promptSpecificImageFile);
+                fluxPayload.image_prompt = base64Image;
+                if (currentPromptImageAspectRatio) {
+                    fluxPayload.aspect_ratio = currentPromptImageAspectRatio;
+                }
+            }
+
+            const apiResponse = await fetch(fluxProxyUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(fluxPayload),
+            });
+
+            const responseBodyText = await apiResponse.text();
+            let fluxResult;
+            try {
+                fluxResult = JSON.parse(responseBodyText);
+            } catch (e) {
+                const errorMessage = `Flux API 返回了無效的回應 (狀態碼 ${apiResponse.status})。內容: ${responseBodyText.substring(0, 300)}`;
+                throw new Error(errorMessage);
+            }
+            
+            if (!apiResponse.ok) {
+                const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || JSON.stringify(fluxResult);
+                throw new Error(`Flux API 錯誤 (${apiResponse.status}): ${errorMessage}`);
+            }
+
+            const base64ImageBytes = fluxResult.image_bytes || (fluxResult.images && fluxResult.images[0]?.image_bytes) || fluxResult.base64_image || fluxResult.generated_image_base64;
+
+            if (base64ImageBytes) {
+                updateStateWithNewImage(`data:${fluxOutputFormat === 'png' ? 'image/png' : 'image/jpeg'};base64,${base64ImageBytes}`, targetProjectId, confirmedPrompt);
+            } else {
+                const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || "回應中未找到圖片資料。";
+                throw new Error(`圖片生成失敗： ${errorMessage}`);
+            }
+        } catch (fluxError: any) {
+            console.error("Error generating image with Flux API (via proxy):", fluxError);
+            setGenerationError(fluxError.message || '處理 Flux API 請求時發生未知錯誤。');
+        } finally {
+            setIsGeneratingImage(false);
+            setFinalPromptForConfirmation(null);
+        }
+    } else if (selectedEngine === 'imagen') {
+        if (!ai) {
+            setGenerationError("Imagen 3 無法使用：Gemini API 環境設定錯誤。請選擇 Flux 並設定 API 金鑰。");
+            setIsGeneratingImage(false);
+            setFinalPromptForConfirmation(null);
+            return;
+        }
+        console.log("Using Imagen 3 (Gemini) for image generation.");
+        try {
+            const generationConfig: any = { 
+                numberOfImages: 1, 
+                outputMimeType: imagenOutputFormat
+            };
+            if (promptSpecificImageFile && currentPromptImageAspectRatio) {
+                generationConfig.aspectRatio = currentPromptImageAspectRatio;
+            }
+            const response = await ai.models.generateImages({
+                model: 'imagen-3.0-generate-002',
+                prompt: confirmedPrompt,
+                config: generationConfig,
+            });
+            if (response.generatedImages && response.generatedImages[0]?.image?.imageBytes) {
+                updateStateWithNewImage(`data:${imagenOutputFormat};base64,${response.generatedImages[0].image.imageBytes}`, targetProjectId, confirmedPrompt);
+            } else {
+                throw new Error("Imagen 3 API 回應中未找到圖片資料。");
+            }
+        } catch (geminiError: any) {
+            console.error("Error generating image with Imagen 3 (Gemini):", geminiError);
+            let msg = `Imagen 3 圖片生成失敗: ${geminiError.message || '未知錯誤'}`;
+            if (geminiError.message?.toLowerCase().includes("quota") || geminiError.message?.toLowerCase().includes("rate limit")) {
+                setIsRecentQuotaError(true);
+            }
+            setGenerationError(msg);
+        } finally {
+            setIsGeneratingImage(false);
+            setFinalPromptForConfirmation(null);
+        }
+    } else {
+        setGenerationError("未選擇有效的圖片生成引擎。");
+        setIsGeneratingImage(false);
+        setFinalPromptForConfirmation(null);
+    }
+  };
+
 
   const handleGenerateImageFromInput = async () => {
     if (activeAnimatedTab === TAB_NAME_CAMERA) {
@@ -1280,219 +1414,79 @@ Respond ONLY with the JSON array of the new tags.`;
          setGenerationError(`在「${TAB_NAME_EDIT}」模式下，請選擇AI建議或輸入文字以形成提示詞。`);
         return;
     }
-    
-    let targetProjectId = currentProjectId;
-    if (!targetProjectId) {
-      const currentSortedProjects = [...projects].sort((a, b) => b.createdAt - a.createdAt); 
-      if (currentSortedProjects.length === 0) {
-        const defaultProjectName = "預設專案";
-        const defaultProject: Project = {
-          id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
-          name: defaultProjectName,
-          images: [],
-          createdAt: Date.now(),
-        };
-        setProjects(prev => [defaultProject, ...prev]); 
-        targetProjectId = defaultProject.id;
-        setCurrentProjectId(targetProjectId); 
-        setActiveModalProjectId(targetProjectId); 
-      } else {
-        targetProjectId = currentSortedProjects[0].id;
-        setCurrentProjectId(targetProjectId);
-        setActiveModalProjectId(targetProjectId);
-      }
-    }
-    
-    if (!targetProjectId) { 
-        setGenerationError("無法確定專案。請選擇或建立一個專案。");
-        return;
-    }
 
-    setIsGeneratingImage(true);
-    setGeneratedImageUrl(null);
+    setIsProcessingPrompt(true);
     setGenerationError(null);
-    setIsRecentQuotaError(false);
-    setLastPromptForGeneratedImage(null);
     setShowImageCompare(false);
     setBeforeImageUrlForCompare(null);
 
     let initialPrompt = "";
     let imageFileForMasterEngineer: File | null = null;
-    const potentialBeforeImage = promptSpecificImagePreviewUrl;
-
+    
     if (ai) {
-        if (activeAnimatedTab === TAB_NAME_GENERATE_IMAGE) {
-            if (promptSpecificImageFile && currentTabImages.length > 0 && userStyleDescriptionFromInputForGenMode) {
-                console.log(`Engineering initial prompt for '${TAB_NAME_GENERATE_IMAGE}' - image modification...`);
-                try {
+        let errorOccurred = false;
+        try {
+            if (activeAnimatedTab === TAB_NAME_GENERATE_IMAGE) {
+                if (promptSpecificImageFile && currentTabImages.length > 0 && userStyleDescriptionFromInputForGenMode) {
                     initialPrompt = await getEngineeredImageModificationPrompt(promptSpecificImageFile, userStyleDescriptionFromInputForGenMode, currentTabImages, ai);
                     imageFileForMasterEngineer = promptSpecificImageFile;
-                } catch (e: any) { setGenerationError(`提示詞工程(1)失敗: ${e.message}.`); setIsGeneratingImage(false); return; }
-            } else if (promptSpecificImageFile && userStyleDescriptionFromInputForGenMode) {
-                console.log(`Engineering initial prompt for '${TAB_NAME_GENERATE_IMAGE}' - structural fidelity...`);
-                try {
+                } else if (promptSpecificImageFile && userStyleDescriptionFromInputForGenMode) {
                     initialPrompt = await getEngineeredPromptForStructuralFidelity(promptSpecificImageFile, userStyleDescriptionFromInputForGenMode, ai);
                     imageFileForMasterEngineer = promptSpecificImageFile;
-                } catch (e: any) { setGenerationError(`提示詞工程(1)失敗: ${e.message}.`); setIsGeneratingImage(false); return; }
-            } else {
+                } else {
+                    initialPrompt = fullPromptForGeneration;
+                    imageFileForMasterEngineer = promptSpecificImageFile;
+                }
+            } else if (activeAnimatedTab === TAB_NAME_REFERENCE_INSPIRATION && promptSpecificImageFile) {
                 initialPrompt = fullPromptForGeneration;
                 imageFileForMasterEngineer = promptSpecificImageFile;
-            }
-        } else if (activeAnimatedTab === TAB_NAME_REFERENCE_INSPIRATION && promptSpecificImageFile) {
-            initialPrompt = fullPromptForGeneration;
-            imageFileForMasterEngineer = promptSpecificImageFile;
-        } else if (activeAnimatedTab === TAB_NAME_ADD_ELEMENT && promptSpecificImageFile && currentTabImages.length > 0) {
-            console.log(`Engineering initial prompt for '${TAB_NAME_ADD_ELEMENT}'...`);
-            try {
+            } else if (activeAnimatedTab === TAB_NAME_ADD_ELEMENT && promptSpecificImageFile && currentTabImages.length > 0) {
                  initialPrompt = await getEngineeredImageModificationPrompt(promptSpecificImageFile, fullPromptForGeneration, currentTabImages, ai);
                  imageFileForMasterEngineer = promptSpecificImageFile;
-            } catch (e:any) { setGenerationError(`「加入」模式提示詞工程(1)失敗: ${e.message}.`); setIsGeneratingImage(false); return; }
-        } else if (activeAnimatedTab === TAB_NAME_EDIT && promptSpecificImageFile) {
-            console.log(`Engineering initial prompt for '${TAB_NAME_EDIT}'...`);
-             try {
+            } else if (activeAnimatedTab === TAB_NAME_EDIT && promptSpecificImageFile) {
                 initialPrompt = await getEngineeredPromptForStructuralFidelity(promptSpecificImageFile, fullPromptForGeneration, ai);
                 imageFileForMasterEngineer = promptSpecificImageFile;
-             } catch (e:any) { setGenerationError(`「編輯」模式提示詞工程(1)失敗: ${e.message}.`); setIsGeneratingImage(false); return; }
-        } else {
-            initialPrompt = fullPromptForGeneration;
-            if (promptSpecificImageFile) imageFileForMasterEngineer = promptSpecificImageFile;
-        }
-    } else {
-        initialPrompt = fullPromptForGeneration;
-        if (promptSpecificImageFile) imageFileForMasterEngineer = promptSpecificImageFile;
-    }
-
-    let finalPromptForImageModel = initialPrompt;
-    if (ai && imageFileForMasterEngineer && initialPrompt) {
-        console.log(`Sending to Master Prompt Engineer. Initial prompt: "${initialPrompt}"`);
-        try {
-            finalPromptForImageModel = await masterPromptEngineer(imageFileForMasterEngineer, initialPrompt, ai);
-        } catch (e: any) {
-            setGenerationError(`最終提示詞工程失敗: ${e.message}. 將使用基本提示詞。`);
-        }
-    }
-    
-    if (!finalPromptForImageModel.trim()) {
-        setGenerationError("最終提示詞為空，無法生成圖片。");
-        setIsGeneratingImage(false);
-        return;
-    }
-    console.log(`Final prompt for image model (${activeAnimatedTab} with ${selectedEngine}):`, finalPromptForImageModel);
-    setLastPromptForGeneratedImage(finalPromptForImageModel);
-
-    const updateStateWithNewImage = (imageUrl: string, projId: string, usedPrompt: string) => {
-        setGeneratedImageUrl(imageUrl);
-        const newHistoryEntry: GeneratedImageHistoryEntry = {
-          id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
-          imageUrl: imageUrl,
-          prompt: usedPrompt, 
-          projectId: projId,
-        };
-        
-        setProjects(prevProjects =>
-          prevProjects.map(p =>
-            p.id === projId
-            ? { ...p, images: [newHistoryEntry, ...p.images] }
-            : p
-          ).sort((a,b) => b.createdAt - a.createdAt) 
-        );
-        setUserBasePrompt(""); 
-        setSelectedAiSuggestionValues([]);
-        if (activeAnimatedTab === TAB_NAME_GENERATE_IMAGE) setGenModeSelectedTagsForPrompt([]);
-        
-        if (potentialBeforeImage) { 
-            setBeforeImageUrlForCompare(potentialBeforeImage);
-            setShowImageCompare(true);
-        }
-    };
-
-    if (selectedEngine === 'flux') {
-        console.log("Using Flux API (via proxy) for image generation with tolerance:", fluxSafetyTolerance);
-        try {
-            const fluxProxyUrl = '/api/flux-proxy';
-            const fluxPayload: any = {
-                prompt: finalPromptForImageModel,
-                output_format: fluxOutputFormat,
-                prompt_upsampling: fluxPromptUpsampling,
-                safety_tolerance: fluxSafetyTolerance,
-            };
-            if (promptSpecificImageFile && currentPromptImageAspectRatio) {
-                fluxPayload.aspect_ratio = currentPromptImageAspectRatio;
-            }
-
-            const apiResponse = await fetch(fluxProxyUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(fluxPayload),
-            });
-
-            const responseBodyText = await apiResponse.text();
-            let fluxResult;
-            try {
-                fluxResult = JSON.parse(responseBodyText);
-            } catch (e) {
-                const errorMessage = `Flux API 返回了無效的回應 (狀態碼 ${apiResponse.status})。內容: ${responseBodyText.substring(0, 300)}`;
-                throw new Error(errorMessage);
-            }
-            
-            if (!apiResponse.ok) {
-                const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || JSON.stringify(fluxResult);
-                throw new Error(`Flux API 錯誤 (${apiResponse.status}): ${errorMessage}`);
-            }
-
-            const base64ImageBytes = fluxResult.image_bytes || (fluxResult.images && fluxResult.images[0]?.image_bytes) || fluxResult.base64_image || fluxResult.generated_image_base64;
-
-            if (base64ImageBytes) {
-                updateStateWithNewImage(`data:${fluxOutputFormat === 'png' ? 'image/png' : 'image/jpeg'};base64,${base64ImageBytes}`, targetProjectId, finalPromptForImageModel);
             } else {
-                const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || "回應中未找到圖片資料。";
-                throw new Error(`圖片生成失敗： ${errorMessage}`);
+                initialPrompt = fullPromptForGeneration;
+                if (promptSpecificImageFile) imageFileForMasterEngineer = promptSpecificImageFile;
             }
-        } catch (fluxError: any) {
-            console.error("Error generating image with Flux API (via proxy):", fluxError);
-            setGenerationError(fluxError.message || '處理 Flux API 請求時發生未知錯誤。');
-        } finally {
-            setIsGeneratingImage(false);
+        } catch (e: any) {
+            setGenerationError(`初步提示詞工程失敗: ${e.message}.`);
+            errorOccurred = true;
         }
-    } else if (selectedEngine === 'imagen') {
-        if (!ai) {
-            setGenerationError("Imagen 3 無法使用：Gemini API 環境設定錯誤。請選擇 Flux 並設定 API 金鑰。");
-            setIsGeneratingImage(false);
+
+        if (errorOccurred) {
+            setIsProcessingPrompt(false);
             return;
         }
-        console.log("Using Imagen 3 (Gemini) for image generation.");
-        try {
-            const generationConfig: any = { 
-                numberOfImages: 1, 
-                outputMimeType: imagenOutputFormat
-            };
-            if (promptSpecificImageFile && currentPromptImageAspectRatio) {
-                generationConfig.aspectRatio = currentPromptImageAspectRatio;
+
+        let finalPromptForImageModel = initialPrompt;
+        if (imageFileForMasterEngineer && initialPrompt) {
+            console.log(`Sending to Master Prompt Engineer. Initial prompt: "${initialPrompt}"`);
+            try {
+                finalPromptForImageModel = await masterPromptEngineer(imageFileForMasterEngineer, initialPrompt, ai);
+            } catch (e: any) {
+                setGenerationError(`最終提示詞工程失敗: ${e.message}.`);
+                setIsProcessingPrompt(false);
+                return;
             }
-            const response = await ai.models.generateImages({
-                model: 'imagen-3.0-generate-002',
-                prompt: finalPromptForImageModel,
-                config: generationConfig,
-            });
-            if (response.generatedImages && response.generatedImages[0]?.image?.imageBytes) {
-                updateStateWithNewImage(`data:${imagenOutputFormat};base64,${response.generatedImages[0].image.imageBytes}`, targetProjectId, finalPromptForImageModel);
-            } else {
-                throw new Error("Imagen 3 API 回應中未找到圖片資料。");
-            }
-        } catch (geminiError: any) {
-            console.error("Error generating image with Imagen 3 (Gemini):", geminiError);
-            let msg = `Imagen 3 圖片生成失敗: ${geminiError.message || '未知錯誤'}`;
-            if (geminiError.message?.toLowerCase().includes("quota") || geminiError.message?.toLowerCase().includes("rate limit")) {
-                setIsRecentQuotaError(true);
-            }
-            setGenerationError(msg);
-        } finally {
-            setIsGeneratingImage(false);
         }
+        
+        if (!finalPromptForImageModel.trim()) {
+            setGenerationError("最終生成的提示詞為空，無法繼續。");
+            setIsProcessingPrompt(false);
+            return;
+        }
+        
+        setFinalPromptForConfirmation(finalPromptForImageModel);
+        setIsConfirmationBubbleVisible(true);
     } else {
-        setGenerationError("未選擇有效的圖片生成引擎。");
-        setIsGeneratingImage(false);
+        // Fallback for when AI is not available
+        setFinalPromptForConfirmation(fullPromptForGeneration);
+        setIsConfirmationBubbleVisible(true);
     }
+    
+    setIsProcessingPrompt(false);
   };
 
   const handleAddGeneratedImageToSpecificTab = async (imageUrl: string, targetTabName: string) => {
@@ -2169,8 +2163,17 @@ ${reportData.suggestions.map(s => `- ${s}`).join('\n')}
         </div>
         
         <div className="w-full max-w-xl mt-auto"> 
-          {(isGeneratingImage || generatedImageUrl || generationError || isGeneratingReport || showImageCompare) && (
+          {(isGeneratingImage || generatedImageUrl || generationError || isGeneratingReport || showImageCompare || isProcessingPrompt) && (
               <div className="mb-4 sm:mb-6 p-3 sm:p-4 border border-gray-200 dark:border-neutral-700 rounded-lg shadow-sm bg-gray-50 dark:bg-neutral-800/30 flex flex-col items-center justify-center min-h-[150px] sm:min-h-[200px]">
+                  {isProcessingPrompt && (
+                      <div className="flex flex-col items-center text-xs sm:text-sm text-gray-500 dark:text-neutral-400">
+                          <svg className="animate-spin h-6 w-6 sm:h-8 sm:w-8 text-sky-500 mb-1.5 sm:mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          正在處理提示詞...
+                      </div>
+                  )}
                   {isGeneratingImage && ( 
                       <div className="flex flex-col items-center text-xs sm:text-sm text-gray-500 dark:text-neutral-400">
                           <svg className="animate-spin h-6 w-6 sm:h-8 sm:w-8 text-sky-500 mb-1.5 sm:mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -2288,6 +2291,7 @@ ${reportData.suggestions.map(s => `- ${s}`).join('\n')}
             onInputChange={handlePromptInputChange}
             onSubmit={handleGenerateImageFromInput}
             isSubmitDisabled={
+              isProcessingPrompt ||
               isGeneratingImage || 
               isRecentQuotaError || 
               (activeAnimatedTab === TAB_NAME_GENERATE_IMAGE ? (!userBasePrompt.trim() && !promptSpecificImageFile && currentTabImages.length === 0 && genModeSelectedTagsForPrompt.length === 0) : false) ||
@@ -2613,6 +2617,38 @@ ${reportData.suggestions.map(s => `- ${s}`).join('\n')}
                 <CloseIcon className="w-4 h-4" />
             </button>
          </div>
+      )}
+
+      {isConfirmationBubbleVisible && finalPromptForConfirmation && (
+        <div 
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4 transition-opacity duration-300"
+            onClick={() => setIsConfirmationBubbleVisible(false)}
+        >
+            <div 
+                className="bg-white dark:bg-neutral-800 rounded-xl shadow-2xl w-full max-w-lg p-4 sm:p-6 space-y-4"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <h3 className="text-base sm:text-lg font-semibold text-neutral-800 dark:text-neutral-100">確認最終提示詞</h3>
+                <div className="max-h-48 overflow-y-auto p-3 bg-neutral-100 dark:bg-neutral-700 rounded-md scrollbar-thin scrollbar-thumb-neutral-400 dark:scrollbar-thumb-neutral-500">
+                    <p className="text-xs sm:text-sm text-neutral-700 dark:text-neutral-200 whitespace-pre-wrap">{finalPromptForConfirmation}</p>
+                </div>
+                <div className="flex justify-end gap-2 sm:gap-3">
+                    <button
+                        onClick={() => setIsConfirmationBubbleVisible(false)}
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium bg-neutral-200 dark:bg-neutral-600 text-neutral-700 dark:text-neutral-200 rounded-md hover:bg-neutral-300 dark:hover:bg-neutral-500"
+                    >
+                        取消
+                    </button>
+                    <button
+                        onClick={() => executeConfirmedGeneration(finalPromptForConfirmation)}
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium bg-sky-500 text-white rounded-md hover:bg-sky-600 flex items-center gap-2"
+                    >
+                        <CheckCircleIcon className="w-4 h-4" />
+                        確認並生成
+                    </button>
+                </div>
+            </div>
+        </div>
       )}
 
 

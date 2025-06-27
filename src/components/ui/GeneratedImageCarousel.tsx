@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GeneratedImageHistoryEntry } from '../../App'; 
 import { FileTextIcon } from 'lucide-react';
