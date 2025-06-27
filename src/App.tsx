@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PlaceholdersAndVanishInput } from './components/ui/PlaceholdersAndVanishInput';
 import { GeneratedImageHistoryModal } from './components/ui/GeneratedImageHistoryModal';
@@ -419,6 +420,32 @@ Output ONLY the final English prompt. No other text or explanation.
     });
     return (response.text || "").trim();
 }
+
+const parseFluxError = (fluxResult: any): string => {
+  if (!fluxResult) return "從 API 收到了空的回應。";
+
+  // Handles FastAPI validation errors: {"detail": [{"msg": "...", ...}]}
+  if (Array.isArray(fluxResult.detail)) {
+      const messages = fluxResult.detail
+          .map((err: any) => err.msg || null)
+          .filter(Boolean);
+      if (messages.length > 0) return messages.join('; ');
+  }
+
+  // Handles single string errors: {"detail": "error message"} or {"message": "..."}
+  if (typeof fluxResult.detail === 'string') return fluxResult.detail;
+  if (typeof fluxResult.message === 'string') return fluxResult.message;
+  if (typeof fluxResult.error === 'string') return fluxResult.error;
+  
+  // The API might return 200 OK with an error message in a non-standard field
+  const hasImageData = fluxResult.image_bytes || (fluxResult.images && fluxResult.images[0]?.image_bytes) || fluxResult.base64_image || fluxResult.generated_image_base64;
+  if (!hasImageData && typeof fluxResult === 'object' && Object.keys(fluxResult).length > 0) {
+     return `未知的錯誤結構: ${JSON.stringify(fluxResult)}`;
+  }
+
+  // Fallback if no image and no specific error message
+  return "回應中未找到圖片資料。";
+};
 
 
 const App: React.FC = () => {
@@ -1383,7 +1410,7 @@ Respond ONLY with the JSON array of the new tags.`;
           }
           
           if (!apiResponse.ok) {
-              const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || JSON.stringify(fluxResult);
+              const errorMessage = parseFluxError(fluxResult);
               throw new Error(`Flux API 錯誤 (${apiResponse.status}): ${errorMessage}`);
           }
 
@@ -1392,7 +1419,7 @@ Respond ONLY with the JSON array of the new tags.`;
           if (base64ImageBytes) {
               updateStateWithNewImage(`data:${fluxOutputFormat === 'png' ? 'image/png' : 'image/jpeg'};base64,${base64ImageBytes}`, targetProjectId, finalPromptForImageModel);
           } else {
-              const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || "回應中未找到圖片資料。";
+              const errorMessage = parseFluxError(fluxResult);
               throw new Error(`圖片生成失敗： ${errorMessage}`);
           }
       } catch (fluxError: any) {
