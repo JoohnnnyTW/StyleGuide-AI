@@ -1,15 +1,22 @@
+# Netlify Build & Redirect Configuration
 [build]
   command = "npm run build"
   publish = "dist"
   functions = "netlify/functions"
 
-# Proxy rule to route API requests to the Netlify Function
+# Proxy rule to route API requests to the Netlify Function.
+# This works for both local development (`netlify dev`) and production.
+# The client-side code calls a relative path like `/api/flux-proxy`,
+# and Netlify routes it to the actual function endpoint.
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200 
 
-# SPA fallback rule (must be last)
+# Single Page Application (SPA) fallback rule.
+# This ensures that any direct navigation to a path like /about
+# serves the index.html, allowing the React router to handle it.
+# This must be the last rule in the file.
 [[redirects]]
   from = "/*"
   to = "/index.html"
