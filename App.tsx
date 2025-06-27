@@ -641,7 +641,7 @@ const App: React.FC = () => {
   };
 
   const handleAddCapturedPhotoToMainImages = () => {
-    if (capturedImagePreview && lastNonCameraActiveTab && lastNonCameraActiveTab !== TAB_NAME_CAMERA && lastNonCameraActiveTab !== TAB_NAME_REFERENCE_INSPIRATION) {
+    if (capturedImagePreview && lastNonCameraActiveTab && lastNonCameraActiveTab !== TAB_NAME_REFERENCE_INSPIRATION && lastNonCameraActiveTab !== TAB_NAME_CAMERA) {
         const file = dataURLtoFile(capturedImagePreview, `captured_main_${Date.now()}.jpg`);
         const currentImagesForTargetTab = tabSelectedImageData[lastNonCameraActiveTab] || [];
         if (currentImagesForTargetTab.length < 3) {
@@ -1361,7 +1361,7 @@ Respond ONLY with the JSON array of the new tags.`;
                 prompt: finalPromptForImageModel,
                 output_format: fluxOutputFormat,
                 prompt_upsampling: fluxPromptUpsampling,
-                safety_tolerance: fluxSafetyTolerance, 
+                safety_tolerance: fluxSafetyTolerance,
             };
             if (promptSpecificImageFile && currentPromptImageAspectRatio) {
                 fluxPayload.aspect_ratio = currentPromptImageAspectRatio;
@@ -1373,20 +1373,31 @@ Respond ONLY with the JSON array of the new tags.`;
                 body: JSON.stringify(fluxPayload),
             });
 
-            if (!apiResponse.ok) {
-                const errorJson = await apiResponse.json().catch(() => ({ message: apiResponse.statusText }));
-                throw new Error(`Flux API Error (via proxy): ${apiResponse.status} - ${errorJson.message || JSON.stringify(errorJson)}`);
+            const responseBodyText = await apiResponse.text();
+            let fluxResult;
+            try {
+                fluxResult = JSON.parse(responseBodyText);
+            } catch (e) {
+                const errorMessage = `Flux API 返回了無效的回應 (狀態碼 ${apiResponse.status})。內容: ${responseBodyText.substring(0, 300)}`;
+                throw new Error(errorMessage);
             }
-            const fluxResult = await apiResponse.json();
-            let base64ImageBytes = fluxResult.image_bytes || (fluxResult.images && fluxResult.images[0]?.image_bytes) || fluxResult.base64_image || fluxResult.generated_image_base64;
+            
+            if (!apiResponse.ok) {
+                const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || JSON.stringify(fluxResult);
+                throw new Error(`Flux API 錯誤 (${apiResponse.status}): ${errorMessage}`);
+            }
+
+            const base64ImageBytes = fluxResult.image_bytes || (fluxResult.images && fluxResult.images[0]?.image_bytes) || fluxResult.base64_image || fluxResult.generated_image_base64;
+
             if (base64ImageBytes) {
                 updateStateWithNewImage(`data:${fluxOutputFormat === 'png' ? 'image/png' : 'image/jpeg'};base64,${base64ImageBytes}`, targetProjectId, finalPromptForImageModel);
             } else {
-                throw new Error("Flux API 回應中未找到圖片資料。");
+                const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || "回應中未找到圖片資料。";
+                throw new Error(`圖片生成失敗： ${errorMessage}`);
             }
         } catch (fluxError: any) {
             console.error("Error generating image with Flux API (via proxy):", fluxError);
-            setGenerationError(`Flux API 圖片生成失敗： ${fluxError.message || '未知錯誤'}`);
+            setGenerationError(fluxError.message || '處理 Flux API 請求時發生未知錯誤。');
         } finally {
             setIsGeneratingImage(false);
         }
