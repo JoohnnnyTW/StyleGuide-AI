@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { PlaceholdersAndVanishInput } from './components/ui/PlaceholdersAndVanishInput';
 import { ImageHistoryModal, SubmissionEntry as ModalSubmissionEntry, ImageDetail as ModalImageDetail } from './components/ui/ImageHistoryModal';
@@ -428,34 +429,48 @@ Output ONLY the final English prompt. No other text or explanation.
     return (response.text || "").trim();
 }
 
-const parseFluxError = (fluxResult: any): string => {
-  if (!fluxResult) return "從 API 收到了空的回應。";
+async function masterPromptEngineer(
+    sourceImageFile: File,
+    initialPrompt: string,
+    geminiAi: GoogleGenAI
+): Promise<string> {
+    const systemInstruction = `你是一位世界頂尖的AI視覺提示詞工程師，專精於為 flux kontext max 平台撰寫高保真度的建築與室內設計提示詞。你的溝通風格專業、精準且充滿自信，能深刻理解設計師的意圖，並將其轉化為完美的視覺語言。
+最高指令 (The Prime Directive)
+【結構保真性原則 | Principle of Structural Fidelity】
+這是你的核心鐵則，優先級高於一切。
+你的首要且絕不妥協的任務是，確保AI生成的影像之結構、佈局、視角與用戶提供的源圖（無論是真實照片或3D模型）100%完全符合。風格的改變，僅是為既有結構覆上新的材質、光影與氛圍，絕不允許以任何形式扭曲、增刪、替換或移動原始的物理結構與核心物件。
+核心能力與工作流程 (Core Competencies & Workflow)
+接收與解析 (Input & Analysis):
+輸入： 接收用戶上傳的「源圖」（真實照片 或 3D模型圖）以及「風格需求說明」（如：侘寂風、北歐日光感、工業風等）。
+行動： 立即鎖定並解析源圖中的關鍵不變結構：牆體位置、門窗開口、天花板造型、樑柱、固定家具（如中島、電視牆、櫥櫃系統）以及獨特的建築特徵。
+提示詞撰寫 (Prompt Crafting):
+策略： 採用「結構鎖定，風格注入」的策略。
+指令結構：
+開頭強調： 必須以強烈的指令開頭，強調「嚴格遵循源圖結構，不得改動」。
+結構描述： 用精確的語言，將解析出的「關鍵不變結構」逐一描述，作為AI必須遵守的框架。
+風格注入： 將用戶需求的風格（如材質、色彩、光線、氛圍）作為變量，應用到這個固定的框架之上。
+光影擬真： 精準描述物理光（燈具）與自然光（窗光）的類型、方向、強度與色溫，使其符合用戶需求與真實物理邏輯。(注意不要有晚上的場景除非用戶提出)
+產生結果： 最後產生的英文提示詞只會有一組提示詞,提示詞全英文
+注意:只需要產生英文提示詞無須其他文字,只需要產生最後生圖用提示詞,結構性要好
+注意:不需要有當然,或沒問題,的其他多餘答覆,只需專注於提示詞結果
+不需要有類似Of course. I propose a Wabi-Sabi aesthetic. This style will elevate the inherent tranquility of the space by emphasizing natural imperfection, organic textures, and a philosophy of quiet contemplation. It represents a sophisticated evolution from the clean lines of the original into a more soulful and tactile experience.
+Here is the master prompt to realize this vision:這句話`;
 
-  // Handles FastAPI validation errors: {"detail": [{"msg": "...", ...}]}
-  if (Array.isArray(fluxResult.detail)) {
-      const messages = fluxResult.detail
-          .map((err: any) => err.msg || null)
-          .filter(Boolean);
-      if (messages.length > 0) return messages.join('; ');
-  }
+    const base64Image = await fileToBase64(sourceImageFile);
+    const imagePart = {
+        inlineData: { mimeType: sourceImageFile.type, data: base64Image },
+    };
+    const textPart = { text: `這是源圖。風格需求說明是: "${initialPrompt}". 請根據您的系統指令生成最終的英文生圖提示詞。` };
 
-  // Handles single string errors: {"detail": "error message"} or {"message": "..."}
-  if (typeof fluxResult.detail === 'string') return fluxResult.detail;
-  if (typeof fluxResult.message === 'string') return fluxResult.message;
-  if (typeof fluxResult.error === 'string') return fluxResult.error;
-  
-  const hasImageData = fluxResult.image_bytes || (fluxResult.images && fluxResult.images[0]?.image_bytes) || fluxResult.base64_image || fluxResult.generated_image_base64;
-  
-  if (!hasImageData) {
-    if (typeof fluxResult === 'object' && fluxResult !== null && Object.keys(fluxResult).length > 0) {
-        return `API 回應了未知的資料結構: ${JSON.stringify(fluxResult)}`;
-    }
-    return "API 已處理請求但未返回圖片。這可能是由於內容審核、提示詞與安全設定衝突或暫時的伺服器問題。請嘗試調整提示詞或「安全容忍度」滑桿後再試。";
-  }
-
-  // This should theoretically not be reached if !hasImageData is handled above.
-  return "回應中未找到圖片資料。";
-};
+    const response: GenerateContentResponse = await geminiAi.models.generateContent({
+        model: 'gemini-2.5-flash-preview-04-17',
+        contents: { parts: [imagePart, textPart] },
+        config: {
+            systemInstruction: systemInstruction,
+        }
+    });
+    return (response.text || "").trim();
+}
 
 
 const App: React.FC = () => {
@@ -576,7 +591,7 @@ const App: React.FC = () => {
     } else if (currentProjectId && !sortedProjects.find(p => p.id === currentProjectId)) {
       setCurrentProjectId(sortedProjects.length > 0 ? sortedProjects[0].id : null);
     }
-  }, [projects, currentProjectId, sortedProjects]); 
+  }, [projects, currentProjectId]); 
 
   const handleTabChange = (newTabLabel: string) => {
     if (newTabLabel !== TAB_NAME_CAMERA) {
@@ -1301,57 +1316,66 @@ Respond ONLY with the JSON array of the new tags.`;
     setShowImageCompare(false);
     setBeforeImageUrlForCompare(null);
 
-    let finalPromptForImageModel = "";
-    let potentialBeforeImage = null;
+    let initialPrompt = "";
+    let imageFileForMasterEngineer: File | null = null;
+    const potentialBeforeImage = promptSpecificImagePreviewUrl;
 
-    if (ai && (activeAnimatedTab === TAB_NAME_GENERATE_IMAGE || activeAnimatedTab === TAB_NAME_REFERENCE_INSPIRATION || activeAnimatedTab === TAB_NAME_ADD_ELEMENT || activeAnimatedTab === TAB_NAME_EDIT) ) {
+    if (ai) {
         if (activeAnimatedTab === TAB_NAME_GENERATE_IMAGE) {
-            potentialBeforeImage = promptSpecificImagePreviewUrl; 
             if (promptSpecificImageFile && currentTabImages.length > 0 && userStyleDescriptionFromInputForGenMode) {
-                console.log(`Engineering prompt for '${TAB_NAME_GENERATE_IMAGE}' - image modification...`);
+                console.log(`Engineering initial prompt for '${TAB_NAME_GENERATE_IMAGE}' - image modification...`);
                 try {
-                    finalPromptForImageModel = await getEngineeredImageModificationPrompt(promptSpecificImageFile, userStyleDescriptionFromInputForGenMode, currentTabImages, ai);
-                } catch (e: any) { setGenerationError(`提示詞工程失敗: ${e.message}. 使用基本提示詞。`); finalPromptForImageModel = userStyleDescriptionFromInputForGenMode; }
+                    initialPrompt = await getEngineeredImageModificationPrompt(promptSpecificImageFile, userStyleDescriptionFromInputForGenMode, currentTabImages, ai);
+                    imageFileForMasterEngineer = promptSpecificImageFile;
+                } catch (e: any) { setGenerationError(`提示詞工程(1)失敗: ${e.message}.`); setIsGeneratingImage(false); return; }
             } else if (promptSpecificImageFile && userStyleDescriptionFromInputForGenMode) {
-                console.log(`Engineering prompt for '${TAB_NAME_GENERATE_IMAGE}' - structural fidelity...`);
+                console.log(`Engineering initial prompt for '${TAB_NAME_GENERATE_IMAGE}' - structural fidelity...`);
                 try {
-                    finalPromptForImageModel = await getEngineeredPromptForStructuralFidelity(promptSpecificImageFile, userStyleDescriptionFromInputForGenMode, ai);
-                } catch (e: any) { setGenerationError(`提示詞工程失敗: ${e.message}. 使用基本提示詞。`); finalPromptForImageModel = userStyleDescriptionFromInputForGenMode; }
+                    initialPrompt = await getEngineeredPromptForStructuralFidelity(promptSpecificImageFile, userStyleDescriptionFromInputForGenMode, ai);
+                    imageFileForMasterEngineer = promptSpecificImageFile;
+                } catch (e: any) { setGenerationError(`提示詞工程(1)失敗: ${e.message}.`); setIsGeneratingImage(false); return; }
             } else {
-                finalPromptForImageModel = fullPromptForGeneration;
+                initialPrompt = fullPromptForGeneration;
+                imageFileForMasterEngineer = promptSpecificImageFile;
             }
         } else if (activeAnimatedTab === TAB_NAME_REFERENCE_INSPIRATION && promptSpecificImageFile) {
-            potentialBeforeImage = promptSpecificImagePreviewUrl;
-            finalPromptForImageModel = fullPromptForGeneration;
+            initialPrompt = fullPromptForGeneration;
+            imageFileForMasterEngineer = promptSpecificImageFile;
         } else if (activeAnimatedTab === TAB_NAME_ADD_ELEMENT && promptSpecificImageFile && currentTabImages.length > 0) {
-            potentialBeforeImage = promptSpecificImagePreviewUrl;
-             console.log(`Engineering prompt for '${TAB_NAME_ADD_ELEMENT}'...`);
+            console.log(`Engineering initial prompt for '${TAB_NAME_ADD_ELEMENT}'...`);
             try {
-                 finalPromptForImageModel = await getEngineeredImageModificationPrompt(promptSpecificImageFile, fullPromptForGeneration, currentTabImages, ai);
-            } catch (e:any) {setGenerationError(`「加入」模式提示詞工程失敗: ${e.message}. 使用基本提示詞。`); finalPromptForImageModel = fullPromptForGeneration;}
-
+                 initialPrompt = await getEngineeredImageModificationPrompt(promptSpecificImageFile, fullPromptForGeneration, currentTabImages, ai);
+                 imageFileForMasterEngineer = promptSpecificImageFile;
+            } catch (e:any) { setGenerationError(`「加入」模式提示詞工程(1)失敗: ${e.message}.`); setIsGeneratingImage(false); return; }
         } else if (activeAnimatedTab === TAB_NAME_EDIT && promptSpecificImageFile) {
-            potentialBeforeImage = promptSpecificImagePreviewUrl;
-             console.log(`Engineering prompt for '${TAB_NAME_EDIT}'...`);
+            console.log(`Engineering initial prompt for '${TAB_NAME_EDIT}'...`);
              try {
-                finalPromptForImageModel = await getEngineeredPromptForStructuralFidelity(promptSpecificImageFile, fullPromptForGeneration, ai);
-             } catch (e:any) {setGenerationError(`「編輯」模式提示詞工程失敗: ${e.message}. 使用基本提示詞。`); finalPromptForImageModel = fullPromptForGeneration;}
+                initialPrompt = await getEngineeredPromptForStructuralFidelity(promptSpecificImageFile, fullPromptForGeneration, ai);
+                imageFileForMasterEngineer = promptSpecificImageFile;
+             } catch (e:any) { setGenerationError(`「編輯」模式提示詞工程(1)失敗: ${e.message}.`); setIsGeneratingImage(false); return; }
+        } else {
+            initialPrompt = fullPromptForGeneration;
+            if (promptSpecificImageFile) imageFileForMasterEngineer = promptSpecificImageFile;
         }
-         else {
-            finalPromptForImageModel = fullPromptForGeneration;
-            if (promptSpecificImageFile) potentialBeforeImage = promptSpecificImagePreviewUrl;
+    } else {
+        initialPrompt = fullPromptForGeneration;
+        if (promptSpecificImageFile) imageFileForMasterEngineer = promptSpecificImageFile;
+    }
+
+    let finalPromptForImageModel = initialPrompt;
+    if (ai && imageFileForMasterEngineer && initialPrompt) {
+        console.log(`Sending to Master Prompt Engineer. Initial prompt: "${initialPrompt}"`);
+        try {
+            finalPromptForImageModel = await masterPromptEngineer(imageFileForMasterEngineer, initialPrompt, ai);
+        } catch (e: any) {
+            setGenerationError(`最終提示詞工程失敗: ${e.message}. 將使用基本提示詞。`);
         }
-    } else { 
-        finalPromptForImageModel = fullPromptForGeneration;
-        if (promptSpecificImageFile) potentialBeforeImage = promptSpecificImagePreviewUrl;
     }
     
-    if (!finalPromptForImageModel.trim() && !(activeAnimatedTab === TAB_NAME_GENERATE_IMAGE && currentTabImages.length > 0 && genModeSelectedTagsForPrompt.length > 0)) {
-        if (!(activeAnimatedTab === TAB_NAME_GENERATE_IMAGE && currentTabImages.length > 0 && genModeSelectedTagsForPrompt.length > 0 && !userStyleDescriptionFromInputForGenMode)) {
-           setGenerationError("最終提示詞為空，無法生成圖片。");
-           setIsGeneratingImage(false);
-           return;
-        }
+    if (!finalPromptForImageModel.trim()) {
+        setGenerationError("最終提示詞為空，無法生成圖片。");
+        setIsGeneratingImage(false);
+        return;
     }
     console.log(`Final prompt for image model (${activeAnimatedTab} with ${selectedEngine}):`, finalPromptForImageModel);
     setLastPromptForGeneratedImage(finalPromptForImageModel);
@@ -1412,7 +1436,7 @@ Respond ONLY with the JSON array of the new tags.`;
             }
             
             if (!apiResponse.ok) {
-                const errorMessage = parseFluxError(fluxResult);
+                const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || JSON.stringify(fluxResult);
                 throw new Error(`Flux API 錯誤 (${apiResponse.status}): ${errorMessage}`);
             }
 
@@ -1421,7 +1445,7 @@ Respond ONLY with the JSON array of the new tags.`;
             if (base64ImageBytes) {
                 updateStateWithNewImage(`data:${fluxOutputFormat === 'png' ? 'image/png' : 'image/jpeg'};base64,${base64ImageBytes}`, targetProjectId, finalPromptForImageModel);
             } else {
-                const errorMessage = parseFluxError(fluxResult);
+                const errorMessage = fluxResult.message || fluxResult.error || fluxResult.detail || "回應中未找到圖片資料。";
                 throw new Error(`圖片生成失敗： ${errorMessage}`);
             }
         } catch (fluxError: any) {
